@@ -1,0 +1,27 @@
+name: Tag Policy (Prod)
+
+on:
+  push:
+    tags:
+      - 'v*-prod'
+
+jobs:
+  verify:
+    name: tag-policy:prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Ensure tag commit is on main
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          if git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"; then
+            echo "Tag ${GITHUB_REF} is reachable from origin/main."
+          else
+            echo "::error::${GITHUB_REF} is not reachable from origin/main"
+            exit 1
+          fi
