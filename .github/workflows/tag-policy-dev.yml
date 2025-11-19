@@ -1,0 +1,27 @@
+name: Tag Policy (Dev)
+
+on:
+  push:
+    tags:
+      - 'v*-dev'
+
+jobs:
+  verify:
+    name: tag-policy:dev
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Ensure tag commit is on develop
+        run: |
+          set -euo pipefail
+          git fetch origin develop --no-tags
+          if git merge-base --is-ancestor "$GITHUB_SHA" "origin/develop"; then
+            echo "Tag ${GITHUB_REF} is reachable from origin/develop."
+          else
+            echo "::error::${GITHUB_REF} is not reachable from origin/develop"
+            exit 1
+          fi
