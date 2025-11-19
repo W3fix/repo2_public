@@ -1,0 +1,16 @@
+name: Deploy to Dev
+
+on:
+  push:
+    tags:
+      - 'v*-dev'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        run: echo "Deploying to dev environment"
