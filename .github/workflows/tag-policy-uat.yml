@@ -1,0 +1,27 @@
+name: Tag Policy (UAT)
+
+on:
+  push:
+    tags:
+      - 'v*-uat'
+
+jobs:
+  verify:
+    name: tag-policy:uat
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Ensure tag commit is on uat
+        run: |
+          set -euo pipefail
+          git fetch origin uat --no-tags
+          if git merge-base --is-ancestor "$GITHUB_SHA" "origin/uat"; then
+            echo "Tag ${GITHUB_REF} is reachable from origin/uat."
+          else
+            echo "::error::${GITHUB_REF} is not reachable from origin/uat"
+            exit 1
+          fi
